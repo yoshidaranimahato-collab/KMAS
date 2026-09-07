@@ -23,7 +23,7 @@ if [ -f "package.json" ]; then
 elif [ -d "KMAS" ] && [ -f "Jtg/package.json" ]; then
     WORK_DIR="KMAS"
 else
-    git clone https://github.com/JishnuTheGamer/Jtg KMAS 2>/dev/null || true
+    git clone https://github.com/yoshidaranimahato-collab/KMAS KMAS 2>/dev/null || true
     WORK_DIR="KMAS"
 fi
 cd "$WORK_DIR" || true
@@ -323,9 +323,9 @@ services:
     environment:
       - NODE_ENV=production
       - PORT=6767
-      - JTG_HOST_DATA_PATH=${PWD}/.data
-      - JTG_OWNER_USER=${JTG_OWNER_USER:-}
-      - JTG_OWNER_PASS=${JTG_OWNER_PASS:-}
+      - KMAS_HOST_DATA_PATH=${PWD}/.data
+      - KMAS_OWNER_USER=${JTG_OWNER_USER:-}
+      - KMAS_OWNER_PASS=${JTG_OWNER_PASS:-}
     volumes:
       - ./.data:/app/.data
       - ./backups:/app/backups
@@ -342,9 +342,9 @@ services:
     environment:
       - NODE_ENV=development
       - PORT=3000
-      - JTG_HOST_DATA_PATH=${PWD}/.data
-      - JTG_OWNER_USER=${JTG_OWNER_USER:-}
-      - JTG_OWNER_PASS=${JTG_OWNER_PASS:-}
+      - KMAS_HOST_DATA_PATH=${PWD}/.data
+      - KMAS_OWNER_USER=${KMAS_OWNER_USER:-}
+      - KMAS_OWNER_PASS=${KMAS_OWNER_PASS:-}
     volumes:
       - ./.data:/app/.data
       - ./backups:/app/backups
@@ -383,7 +383,7 @@ setup_node_env() {
 module.exports = {
   apps: [
     {
-      name: "jtg-main",
+      name: "kmas-main",
       script: "npm",
       args: "start",
       instances: 1,
@@ -436,10 +436,11 @@ setup_owner() {
 
 setup_owner_docker() {
     local TARGET=$1
-    if [ -n "$JTG_OWNER_USER" ] && [ -n "$JTG_OWNER_PASS" ]; then
+    if [ -n "$KMAS_OWNER_USER" ] && [ -n "$KMAS_OWNER_PASS" ]; then
         local DOCKER_CLI=$(get_docker_cmd)
-        sleep 2
-        $DOCKER_CLI exec -e JTG_OWNER_USER="$JTG_OWNER_USER" -e JTG_OWNER_PASS="$JTG_OWNER_PASS" "$TARGET" npm run createuser 2>&1 || {
+        sleep 
+        $DOCKER_CLI exec -e KMAS_OWNER_USER="$JTG_OWNER_USER" -e KMAS_OWNER_PASS="$KMAS
+        _OWNER_PASS" "$TARGET" npm run createuser 2>&1 || {
             if command -v node &> /dev/null && [ -f "scripts/createuser.ts" ] && [ -d "node_modules" ]; then
                 npm run createuser 2>&1 || true
             fi
@@ -465,8 +466,8 @@ start_panel_docker() {
     # Free up port from PM2 if it was previously running under local Node.js
     if command -v pm2 &> /dev/null || [ -f "node_modules/.bin/pm2" ]; then
         run_pm2 delete "$TARGET" > /dev/null 2>&1 || true
-        if [ "$TARGET" = "jtg-main" ]; then
-            run_pm2 delete "jtg-panel" > /dev/null 2>&1 || true
+        if [ "$TARGET" = "kmas-main" ]; then
+            run_pm2 delete "kmas-panel" > /dev/null 2>&1 || true
         fi
     fi
 
@@ -517,11 +518,11 @@ start_panel_docker() {
 
 start_panel_node() {
     local TARGET=$1
-    if [ "$TARGET" = "jtg-main" ]; then
-        run_pm2 delete jtg-panel 2>/dev/null || true
+    if [ "$TARGET" = "kmas-main" ]; then
+        run_pm2 delete kmas-panel 2>/dev/null || true
         # Clean up conflicting Docker container if previously running via Docker
         local DOCKER_CLI=$(get_docker_cmd)
-        $DOCKER_CLI rm -f jtg-main jtg-panel 2>/dev/null || true
+        $DOCKER_CLI rm -f kmas-main kmas-panel 2>/dev/null || true
     fi
     # Ensure Docker daemon is running and socket accessible for Minecraft containers
     if command -v systemctl &> /dev/null; then
@@ -603,11 +604,11 @@ show_status() {
     local DEV_STATUS="OFF"
     local SFTP_STATUS="OFF"
     
-    if (run_pm2 list 2>/dev/null | grep "jtg-main" | grep -q "online") ||        (command -v docker &> /dev/null && docker ps --format '{{.Names}}' 2>/dev/null | grep -q "^jtg-main$") ||        curl -s -m 2 http://127.0.0.1:6767/api/health 2>/dev/null | grep -q "JTG Panel"; then
+    if (run_pm2 list 2>/dev/null | grep "kmas-main" | grep -q "online") ||        (command -v docker &> /dev/null && docker ps --format '{{.Names}}' 2>/dev/null | grep -q "^jtg-main$") ||        curl -s -m 2 http://127.0.0.1:6767/api/health 2>/dev/null | grep -q "JTG Panel"; then
         MAIN_STATUS="ONLINE"
     fi
     
-    if (run_pm2 list 2>/dev/null | grep "jtg-admin" | grep -q "online") ||        (command -v docker &> /dev/null && docker ps --format '{{.Names}}' 2>/dev/null | grep -q "^jtg-admin$") ||        curl -s -m 2 http://127.0.0.1:3000/api/health 2>/dev/null | grep -q "JTG Panel"; then
+    if (run_pm2 list 2>/dev/null | grep "kmas-admin" | grep -q "online") ||        (command -v docker &> /dev/null && docker ps --format '{{.Names}}' 2>/dev/null | grep -q "^jtg-admin$") ||        curl -s -m 2 http://127.0.0.1:3000/api/health 2>/dev/null | grep -q "JTG Panel"; then
         DEV_STATUS="ONLINE"
     fi
     
@@ -619,7 +620,7 @@ show_status() {
 
     echo -e "
 ${CYAN}${BOLD}╔══════════════════════════════════════════════╗"
-    echo -e "║              JTG PANEL STATUS                ║"
+    echo -e "║              KMAS PANEL STATUS                ║"
     echo -e "╠══════════════════════════════════════════════╣${NC}"
     echo -e "║"
     if [ "$MAIN_STATUS" = "ONLINE" ]; then
@@ -648,12 +649,12 @@ install_panel() {
     local TARGET=$1
     local PANEL_NAME="Main Panel"
     local PORT="6767"
-    local SERVICE_NAME="jtg-main"
+    local SERVICE_NAME="kmas-main"
     
     if [ "$TARGET" = "dev" ]; then
         PANEL_NAME="Developer Panel"
         PORT="3000"
-        SERVICE_NAME="jtg-admin"
+        SERVICE_NAME="kmas-admin"
     fi
 
     print_banner
@@ -700,12 +701,12 @@ install_panel() {
         local OWNER_PASS=""
         local OWNER_PASS2=""
         
-        if [ -n "$JTG_OWNER_USER" ] && [ -n "$JTG_OWNER_PASS" ]; then
-            OWNER_USER="$JTG_OWNER_USER"
-            OWNER_PASS="$JTG_OWNER_PASS"
+        if [ -n "$JTG_OWNER_USER" ] && [ -n "$KMAS_OWNER_PASS" ]; then
+            OWNER_USER="$KMAS_OWNER_USER"
+            OWNER_PASS="$KMAS_OWNER_PASS"
         elif [ ! -t 0 ]; then
             OWNER_USER="owner"
-            OWNER_PASS="owner12345"
+            OWNER_PASS="owner"
         else
             while true; do
                 read -p "║ Username: " OWNER_USER
@@ -732,8 +733,8 @@ install_panel() {
         fi
         echo -e "╚══════════════════════════════════════════════╝"
         
-        export JTG_OWNER_USER="$OWNER_USER"
-        export JTG_OWNER_PASS="$OWNER_PASS"
+        export KMAS_OWNER_USER="$OWNER_USER"
+        export KMAS_OWNER_PASS="$OWNER_PASS"
     fi
     
     # Environment Setup
@@ -854,11 +855,11 @@ fi
 
 while true; do
     print_banner
-    echo -e "  ${BOLD}1)${NC} Initialize Main Panel"
+    echo -e "  ${BOLD}1)${NC} Install Main Panel"
     echo -e "  ${BOLD}2)${NC} Initialize Developer Panel"
     echo -e "  ${BOLD}3)${NC} Update JTG Panel"
     echo -e "  ${BOLD}4)${NC} Create Owner"
-    echo -e "  ${BOLD}5)${NC} Uninstall JTG Panel"
+    echo -e "  ${BOLD}5)${NC} Uninstall KMAS Panel"
     echo -e "  ${BOLD}6)${NC} Exit"
     echo -e "\n========================================================"
     if ! read -p " Choose an option (1-6): " CHOICE; then
