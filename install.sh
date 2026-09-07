@@ -20,11 +20,11 @@ NC='\033[0m'
 
 if [ -f "package.json" ]; then
     WORK_DIR="."
-elif [ -d "Jtg" ] && [ -f "Jtg/package.json" ]; then
-    WORK_DIR="Jtg"
+elif [ -d "KMAS" ] && [ -f "Jtg/package.json" ]; then
+    WORK_DIR="KMAS"
 else
-    git clone https://github.com/JishnuTheGamer/Jtg Jtg 2>/dev/null || true
-    WORK_DIR="Jtg"
+    git clone https://github.com/JishnuTheGamer/Jtg KMAS 2>/dev/null || true
+    WORK_DIR="KMAS"
 fi
 cd "$WORK_DIR" || true
 
@@ -313,7 +313,7 @@ EOF2
         cat << 'EOF2' > docker-compose.yml
 version: '3.8'
 services:
-  jtg-main:
+  KMAS-main:
     build: .
     container_name: jtg-main
     restart: unless-stopped
@@ -331,7 +331,7 @@ services:
       - ./backups:/app/backups
       - /var/run/docker.sock:/var/run/docker.sock
 
-  jtg-admin:
+  KMAS-admin:
     build: .
     container_name: jtg-admin
     restart: unless-stopped
@@ -399,7 +399,7 @@ module.exports = {
       }
     },
     {
-      name: "jtg-admin",
+      name: "KMAS-admin",
       script: "npm",
       args: "run dev",
       instances: 1,
