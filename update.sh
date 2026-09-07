@@ -20,7 +20,7 @@ print_banner() {
     fi
     echo -e "${CYAN}${BOLD}"
     echo "================================================"
-    echo "        JTG PANEL SAFE UPDATE"
+    echo "        KMAS PANEL UPDATE"
     echo "================================================"
     echo -e "${NC}"
 }
@@ -42,7 +42,7 @@ run_pm2() {
 execute_step() {
     local msg="$1"
     shift
-    local step_id="jtg_upd_$RANDOM"
+    local step_id="kmas_upd_$RANDOM"
     local log_file="/tmp/${step_id}.log"
     
     printf "  ${CYAN}→${NC} %-42s " "$msg"
@@ -91,9 +91,9 @@ else
 fi
 
 RUNTIME="Unknown"
-if (run_pm2 list 2>/dev/null | grep -q "jtg-main"); then
+if (run_pm2 list 2>/dev/null | grep -q "kmas-main"); then
     RUNTIME="Local Node.js"
-elif command -v docker &> /dev/null && docker ps -a --format '{{.Names}}' | grep -qE "^jtg-main$"; then
+elif command -v docker &> /dev/null && docker ps -a --format '{{.Names}}' | grep -qE "^kmas-main$"; then
     RUNTIME="Docker"
 fi
 
@@ -181,7 +181,7 @@ restart_service() {
         else
             COMPOSE_CMD="$DOCKER_CLI compose"
         fi
-        $COMPOSE_CMD up -d --build jtg-main
+        $COMPOSE_CMD up -d --build kmas-main
     elif [ "$RUNTIME" = "Local Node.js" ]; then
         if command -v systemctl &> /dev/null; then
             systemctl start docker 2>/dev/null || sudo systemctl start docker 2>/dev/null || true
@@ -191,7 +191,7 @@ restart_service() {
         if [ -S "/var/run/docker.sock" ]; then
             chmod 666 /var/run/docker.sock 2>/dev/null || sudo chmod 666 /var/run/docker.sock 2>/dev/null || true
         fi
-        run_pm2 restart jtg-main || run_pm2 start ecosystem.config.cjs --only jtg-main
+        run_pm2 restart kmas-main || run_pm2 start ecosystem.config.cjs --only kmas-main
         run_pm2 save --force 2>/dev/null || true
     fi
 }
@@ -220,4 +220,4 @@ if ! execute_step "Health check" health_check_step; then
     exit 1
 fi
 
-echo -e "\n${GREEN}[SUCCESS]${NC} JTG Panel updated and verified successfully!"
+echo -e "\n${GREEN}[SUCCESS]${NC} KMAS Panel updated and verified successfully!"
