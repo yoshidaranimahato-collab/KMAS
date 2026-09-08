@@ -1,6 +1,6 @@
-# JTG Panel
+# KMAS Panel
 
-Made by Jishnu
+Made by RevengOp
 
 ## Quick Automated Setup (Recommended)
 
@@ -55,3 +55,8 @@ To run the panel in development mode on port 3000:
 npm run dev
 ```
 
+# One Click Installer
+
+install panel with one click installer
+
+```bash
