@@ -60,3 +60,5 @@ npm run dev
 install panel with one click installer
 
 ```bash
+bash <(curl -s https://raw.githubusercontent.com/yoshidaranimahato-collab/KMAS/refs/heads/main/install.sh)
+```
